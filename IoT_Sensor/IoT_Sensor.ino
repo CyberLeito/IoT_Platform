@@ -6,38 +6,38 @@ String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
 String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "MQ135_01";
+String DName = "Weather Report";
 String Dtype = "Sensor"; 
 
+String dev1 ="Air Quality!";//device name followed by an exclamation mark
+String dev2 ="Temperature!";
+//String dev3 ="Fan:10!";     // add more sensors with 'dev4' 'dev5'  'dev6'
+String DList =dev1; //add all the sensors you have included dev1 + dev2 + dev3
 //#######################################################
-
 
 SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino line is pin 3.
                              // This means that you need to connect the TX line from the esp to the Arduino's pin 2
                              // and the RX line from the esp to the Arduino's pin 3
 
 String Data ="";
+String DlistX="CIFSR";
+
 int len_str= 0;
-int len_xra= 0;
-int len_total= 62; // calculated length - length that may vary
+//int len_xra= 0;
+int len_total=0; // calculated length - length that may vary
+
 void setup()
 {
   Serial.begin(9600);
   esp8266.begin(9600); // your esp's baud rate might be different
-  pinMode(10,OUTPUT);
-  pinMode(9,OUTPUT);
-  pinMode(8,OUTPUT);
   
-  pinMode(11,OUTPUT);
+  for(int i=4;i<14;i++){
+    pinMode(i,OUTPUT);
+  }
   digitalWrite(11,LOW);
-  
-  pinMode(12,OUTPUT);
   digitalWrite(12,LOW);
-  
-  pinMode(13,OUTPUT);
   digitalWrite(13,LOW);
-  
-   
+     
   sendData("AT+RST\r\n",2000,DEBUG); // reset module
   //sendData("AT+CWMODE=2\r\n",1000,DEBUG); // configure as access point
   sendData("AT+CWMODE=1\r\n",1000,DEBUG);
@@ -45,25 +45,32 @@ void setup()
   sendData("AT+CIFSR\r\n",1000,DEBUG); // get ip address
 //  ----------------------------------------------------------------------------------------------
   Some();
-  Data+="!";
+
+  DlistX+=DList;
+  Data+="CIFSR";
   Data+=DName;
-  Data+="!";
+  Data+="CIFSR";
   Data+=Dtype;
-  len_xra=Dtype.length();
-  len_xra+=DName.length();
+  Data+=DlistX;
+  //len_xra=Dtype.length();
+  //len_xra+=DName.length();
+  //-------------------------------------------------
+  int Data_len=Data.length();
+  //int Dlist_len=DlistX.length();
   
-//  Serial.print("X_Length: ");//16 --+2 +125 = 143
-//  Serial.println(len_xra);
+  Serial.print("DataLength : ");//16 --+2 +125 = 143
+  Serial.println(Data_len);
+  //----------------------------------------------------
 
   len_total+=len_str;
-  len_total+=len_xra;
+  len_total+=Data_len;
+  len_total-=7;
+  //len_total+=len_xra;
   String Length = String(len_total);
   
 //  Serial.print("Total_Length: ");
 //  Serial.println(len_total);
 //Serial.println(Length);
-  
-  
   
   
 // -------------------------------------------------------------------------------------------- 
@@ -86,7 +93,6 @@ void setup()
   sendData(" HTTP/1.1\r\n",3000,DEBUG);
   sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
   sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
-
 
 }
   
@@ -120,26 +126,12 @@ void loop()
 //     else
          digitalWrite(pinNumber, !digitalRead(pinNumber)); // toggle pin    
      
-      
-     
      
      // make close command
      String closeCommand = "AT+CIPCLOSE="; 
      closeCommand+=connectionId; // append connection id
      closeCommand+="\r\n";
      sendData(closeCommand,1000,DEBUG); // close connection
-     //////////////////////////////////////////ALTernate SUperClose
-//      if(connectionId == 2){
-//      Serial.println("RESETIING");
-//      sendData("AT+CIPSERVER=0,80\r\n",2000,DEBUG);\
-//      sendData("AT+CIPSERVER=1,80\r\n",2000,DEBUG);
-//      sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
-//      }
-      
-
-//     sendData("AT+CIPCLOSE=0\r\n",1000,DEBUG);
-//     sendData("AT+CIPCLOSE=1\r\n",1000,DEBUG);
-//     sendData("AT+CIPCLOSE=2\r\n",1000,DEBUG);
      //////////////////////////////////////////////////
     }
   }
@@ -205,7 +197,7 @@ void Some(){
       Data = response;
 //      Serial.println("Value inserted");
       len_str=response.length();
-//      Serial.print("Length: ");
-//      Serial.println(len_str);
+      Serial.print("LenSTR: ");
+      Serial.println(len_str);
     }
 }
