@@ -4,9 +4,9 @@
 //#######################################################
 String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
-String HOSTIP = "\"192.168.0.109\""; //IP of raspberry pi
+String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "TestProbe1";
+String DName = "MQ135_01";
 String Dtype = "Sensor"; 
 
 //#######################################################
