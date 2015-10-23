@@ -16,10 +16,9 @@ String dev4 ="Light12:12!";
 String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
 //#######################################################
 
-SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino line is pin 3.
-                             // This means that you need to connect the TX line from the esp to the Arduino's pin 2
-                             // and the RX line from the esp to the Arduino's pin 3
-
+SoftwareSerial esp8266(3,2); //RX >> 2
+                             //TX >>3
+                            
 String Data ="";
 String DlistX="CIFSR";
 
