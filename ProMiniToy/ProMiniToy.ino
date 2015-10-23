@@ -6,15 +6,14 @@ String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
 String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "Weather Report";
-String Dtype = "Sensor"; 
+String DName = "ProMiniToy";
+String Dtype = "Switch"; 
 
-String dev1 ="Air Quality!";//device name followed by an exclamation mark
-int ReadDelay = 1000; //readings are taken every (1000ms) second
-int UploadDelay = 10; //every 10 values get uploaded
-String dev2 ="Temperature!";
-//String dev3 ="Fan:10!";     // add more sensors with 'dev4' 'dev5'  'dev6'
-String DList =dev1; //add all the sensors you have included dev1 + dev2 + dev3
+String dev1 ="Light9:9!";//device name followed by a colon, device/relay pin, followed by exclamation mark
+String dev2 ="Light7:7!";
+String dev3 ="Light10:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
+String dev4 ="Light12:12!";
+String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
 //#######################################################
 
 SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino line is pin 3.
@@ -24,12 +23,8 @@ SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino l
 String Data ="";
 String DlistX="CIFSR";
 
-int len_str= 0;
-//int len_xra= 0;
-int len_total=0; // calculated length - length that may vary
 
-int ValueA = 0;
-String Readings ="";
+int len_total=11; // calculated length
 
 void setup()
 {
@@ -39,6 +34,9 @@ void setup()
   for(int i=4;i<14;i++){
     pinMode(i,OUTPUT);
   }
+  digitalWrite(11,LOW);
+  digitalWrite(12,LOW);
+  digitalWrite(13,LOW);
      
   sendData("AT+RST\r\n",2000,DEBUG); // reset module
   //sendData("AT+CWMODE=2\r\n",1000,DEBUG); // configure as access point
@@ -54,25 +52,7 @@ void setup()
   Data+="CIFSR";
   Data+=Dtype;
   Data+=DlistX;
-  //len_xra=Dtype.length();
-  //len_xra+=DName.length();
-  //-------------------------------------------------
-  int Data_len=Data.length();
-  //int Dlist_len=DlistX.length();
   
-  Serial.print("DataLength : ");//16 --+2 +125 = 143
-  Serial.println(Data_len);
-  //----------------------------------------------------
-
-  len_total+=len_str;
-  len_total+=Data_len;
-  len_total-=7;
-  //len_total+=len_xra;
-  String Length = String(len_total);
-  
-//  Serial.print("Total_Length: ");
-//  Serial.println(len_total);
-//Serial.println(Length);
   
   
 // -------------------------------------------------------------------------------------------- 
@@ -80,7 +60,7 @@ void setup()
   //sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
   sendData("AT+CIPSTART=4,\"TCP\","+HOSTIP+","+HOSTPort+"\r\n",1000,DEBUG);
   sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
-  sendData("AT+CIPSEND=4,"+Length+"\r\n",1000,DEBUG);
+  
   
   String GetComm ="GET http://";
   GetComm+=HOSTIP;
@@ -89,9 +69,17 @@ void setup()
   GetComm+="/connect.php?data=";
   GetComm+=Data;
   GetComm+="\r\n";
+  //------------------
+  int lenY=GetComm.length();
+  Serial.print("Getcomm length: ");
+  Serial.println(lenY);
   
+  
+  len_total+=lenY;
+  String Length = String(len_total);
+  
+  sendData("AT+CIPSEND=4,"+Length+"\r\n",1000,DEBUG);
   sendData(GetComm,1000,DEBUG);
-  //sendData("GET http://"+ShostIP+":"+Port"/connect.php?data="+Data+"\r\n",1000,DEBUG);
   sendData(" HTTP/1.1\r\n",3000,DEBUG);
   sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
   sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
@@ -102,38 +90,59 @@ void loop()
 {
   if(esp8266.available()) // check if the esp is sending a message 
   {
+ 
+    
+    if(esp8266.find("+IPD,"))
+    {
+     delay(2000); // wait for the serial buffer to fill up (read all the serial data)
+     // get the connection id so that we can then disconnect
+     int conx = esp8266.read();
+//     Serial.println(conx);
+     
+     int connectionId = conx-48; // subtract 48 because the read() function returns 
+            // the ASCII decimal value and 0 (the first decimal number) starts at 48
+     
+     Serial.println(connectionId);
+     esp8266.find("pin="); // advance cursor to "pin="
+     
+//     int pinNumber = (esp8266.read()-48)*10; // get first number i.e. if the pin 13 then the 1st number is 1, then multiply to get 10
+//     pinNumber += (esp8266.read()-48); // get second number, i.e. if the pin number is 13 then the 2nd number is 3, then add to the first number
 
-   for(int i=0;i>10;i++){
-      ValueA=analogRead(A0);
-      Readings+=ValueA;
-      delay(ReadDelay);
-   }
-   
-    String SensorComm ="GET http://";
-    SensorComm+=HOSTIP;
-    SensorComm+=":";
-    SensorComm+=HOSTPort;
-    SensorComm+="/connect.php?data=";
-    SensorComm+=ValData;
-    SensorComm+="\r\n";
+
+
+     int pinFirstDigit =(esp8266.read()-48);
+     int pinSecondDigit =(esp8266.read()-48);
+
+      Serial.print("First Digit: ");
+      Serial.println(pinFirstDigit);
+      Serial.print("Second Digit: ");
+      Serial.println(pinSecondDigit);
+
+int pinNumber =0;
 
     
-    sendData("AT+CIPSEND=4,"+LengthV+"\r\n",1000,DEBUG);
-    sendData(SensorComm,1000,DEBUG);
-    sendData(" HTTP/1.1\r\n",3000,DEBUG);
-   
+     if(pinFirstDigit!=1){
+      pinNumber=pinFirstDigit;
+     }
+     else{
+     pinNumber= pinFirstDigit*10;
+     pinNumber+=pinSecondDigit;
+     }
 
-// Read delay, upload delay
+    Serial.print("Pin Number: ");
+    Serial.println(pinNumber);
+     
 
-
-
-
-
-
-
-
-    
-
+         digitalWrite(pinNumber, !digitalRead(pinNumber)); // toggle pin    
+     
+     
+     // make close command
+     String closeCommand = "AT+CIPCLOSE="; 
+     closeCommand+=connectionId; // append connection id
+     closeCommand+="\r\n";
+     sendData(closeCommand,1000,DEBUG); // close connection
+     //////////////////////////////////////////////////
+    }
   }
 }
  
@@ -196,8 +205,6 @@ void Some(){
 //      Serial.println(response);
       Data = response;
 //      Serial.println("Value inserted");
-      len_str=response.length();
-      Serial.print("LenSTR: ");
-      Serial.println(len_str);
+ 
     }
 }

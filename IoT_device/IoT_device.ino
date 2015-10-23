@@ -6,13 +6,14 @@ String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
 String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "TestProbe2";
+String DName = "TestProbe4";
 String Dtype = "Switch"; 
 
 String dev1 ="TubeLight:12!";//device name followed by a colon, device/relay pin, followed by exclamation mark
 String dev2 ="RedLight:11!";
 String dev3 ="Fan:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
-String DList =dev1 + dev2 + dev3; //add all the devices you have included
+String dev4 ="TestLED6:6!";
+String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
 //#######################################################
 
 SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino line is pin 3.
@@ -22,9 +23,8 @@ SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino l
 String Data ="";
 String DlistX="CIFSR";
 
-int len_str= 0;
-//int len_xra= 0;
-int len_total=0; // calculated length - length that may vary
+
+int len_total=11; // calculated length
 
 void setup()
 {
@@ -52,25 +52,7 @@ void setup()
   Data+="CIFSR";
   Data+=Dtype;
   Data+=DlistX;
-  //len_xra=Dtype.length();
-  //len_xra+=DName.length();
-  //-------------------------------------------------
-  int Data_len=Data.length();
-  //int Dlist_len=DlistX.length();
   
-  Serial.print("DataLength : ");//16 --+2 +125 = 143
-  Serial.println(Data_len);
-  //----------------------------------------------------
-
-  len_total+=len_str;
-  len_total+=Data_len;
-  len_total-=7;
-  //len_total+=len_xra;
-  String Length = String(len_total);
-  
-//  Serial.print("Total_Length: ");
-//  Serial.println(len_total);
-//Serial.println(Length);
   
   
 // -------------------------------------------------------------------------------------------- 
@@ -78,7 +60,7 @@ void setup()
   //sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
   sendData("AT+CIPSTART=4,\"TCP\","+HOSTIP+","+HOSTPort+"\r\n",1000,DEBUG);
   sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
-  sendData("AT+CIPSEND=4,"+Length+"\r\n",1000,DEBUG);
+  
   
   String GetComm ="GET http://";
   GetComm+=HOSTIP;
@@ -87,9 +69,17 @@ void setup()
   GetComm+="/connect.php?data=";
   GetComm+=Data;
   GetComm+="\r\n";
+  //------------------
+  int lenY=GetComm.length();
+  Serial.print("Getcomm length: ");
+  Serial.println(lenY);
   
+  
+  len_total+=lenY;
+  String Length = String(len_total);
+  
+  sendData("AT+CIPSEND=4,"+Length+"\r\n",1000,DEBUG);
   sendData(GetComm,1000,DEBUG);
-  //sendData("GET http://"+ShostIP+":"+Port"/connect.php?data="+Data+"\r\n",1000,DEBUG);
   sendData(" HTTP/1.1\r\n",3000,DEBUG);
   sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
   sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
@@ -115,15 +105,34 @@ void loop()
      Serial.println(connectionId);
      esp8266.find("pin="); // advance cursor to "pin="
      
-     int pinNumber = (esp8266.read()-48)*10; // get first number i.e. if the pin 13 then the 1st number is 1, then multiply to get 10
-     pinNumber += (esp8266.read()-48); // get second number, i.e. if the pin number is 13 then the 2nd number is 3, then add to the first number
+//     int pinNumber = (esp8266.read()-48)*10; // get first number i.e. if the pin 13 then the 1st number is 1, then multiply to get 10
+//     pinNumber += (esp8266.read()-48); // get second number, i.e. if the pin number is 13 then the 2nd number is 3, then add to the first number
+
+
+
+     int pinFirstDigit =(esp8266.read()-48);
+     int pinSecondDigit =(esp8266.read()-48);
+
+      Serial.print("First Digit: ");
+      Serial.println(pinFirstDigit);
+      Serial.print("Second Digit: ");
+      Serial.println(pinSecondDigit);
+
+int pinNumber =0;
+
+    
+     if(pinFirstDigit!=1){
+      pinNumber=pinFirstDigit;
+     }
+     else{
+     pinNumber= pinFirstDigit*10;
+     pinNumber+=pinSecondDigit;
+     }
+
+    Serial.print("Pin Number: ");
+    Serial.println(pinNumber);
      
-//     if(pinNumber == 20){
-//       Serial.println(pinNumber);
-//       Serial.println("RESETIING");
-//       setup();
-//       }
-//     else
+
          digitalWrite(pinNumber, !digitalRead(pinNumber)); // toggle pin    
      
      
@@ -196,8 +205,6 @@ void Some(){
 //      Serial.println(response);
       Data = response;
 //      Serial.println("Value inserted");
-      len_str=response.length();
-      Serial.print("LenSTR: ");
-      Serial.println(len_str);
+ 
     }
 }
