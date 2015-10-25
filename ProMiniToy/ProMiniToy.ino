@@ -33,15 +33,12 @@ void setup()
   for(int i=4;i<14;i++){
     pinMode(i,OUTPUT);
   }
-  digitalWrite(11,LOW);
-  digitalWrite(12,LOW);
-  digitalWrite(13,LOW);
      
   sendData("AT+RST\r\n",2000,DEBUG); // reset module
   //sendData("AT+CWMODE=2\r\n",1000,DEBUG); // configure as access point
   sendData("AT+CWMODE=1\r\n",1000,DEBUG);
-  sendData("AT+CWJAP="+WiFi_SSID+","+WiFi_Pass+"\r\n",7000,DEBUG);
-  sendData("AT+CIFSR\r\n",1000,DEBUG); // get ip address
+  sendData("AT+CWJAP="+WiFi_SSID+","+WiFi_Pass+"\r\n",10000,DEBUG);
+  sendData("AT+CIFSR\r\n",5000,DEBUG); // get ip address
 //  ----------------------------------------------------------------------------------------------
   Some();
 
@@ -65,7 +62,7 @@ void setup()
   GetComm+=HOSTIP;
   GetComm+=":";
   GetComm+=HOSTPort;
-  GetComm+="/connect.php?data=";
+  GetComm+="/connect2.php?data="; //use "connect2.php" for stock ESP8266 firmware, and "connect.php" for updated firmware
   GetComm+=Data;
   GetComm+="\r\n";
   //------------------
