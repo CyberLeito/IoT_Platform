@@ -4,15 +4,15 @@
 //#######################################################
 String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
-String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
+String HOSTIP = "192.168.0.112"; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "ProMiniToy";
+String DName = "ProMiniToy2.0";
 String Dtype = "Switch"; 
 
 String dev1 ="Light9:9!";//device name followed by a colon, device/relay pin, followed by exclamation mark
-String dev2 ="Light7:7!";
+String dev2 ="Light6:6!";
 String dev3 ="Light10:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
-String dev4 ="Light12:12!";
+String dev4 ="Someupdates:12!";
 String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
 //#######################################################
 
@@ -35,10 +35,10 @@ void setup()
   }
      
   sendData("AT+RST\r\n",2000,DEBUG); // reset module
-  //sendData("AT+CWMODE=2\r\n",1000,DEBUG); // configure as access point
-  sendData("AT+CWMODE=1\r\n",1000,DEBUG);
-  sendData("AT+CWJAP="+WiFi_SSID+","+WiFi_Pass+"\r\n",10000,DEBUG);
-  sendData("AT+CIFSR\r\n",5000,DEBUG); // get ip address
+  //sendData("AT+CWMODE=1\r\n",1000,DEBUG);
+  sendData("AT+CWJAP="+WiFi_SSID+","+WiFi_Pass+"\r\n",7000,DEBUG);
+  delay(2000);
+  sendData("AT+CIFSR\r\n",1000,DEBUG); // get ip address
 //  ----------------------------------------------------------------------------------------------
   Some();
 
@@ -54,8 +54,8 @@ void setup()
 // -------------------------------------------------------------------------------------------- 
   sendData("AT+CIPMUX=1\r\n",1000,DEBUG); // configure for multiple connections
   //sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
-  sendData("AT+CIPSTART=4,\"TCP\","+HOSTIP+","+HOSTPort+"\r\n",1000,DEBUG);
-  sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
+  sendData("AT+CIPSTART=4,\"TCP\",\""+HOSTIP+"\","+HOSTPort+"\r\n",1000,DEBUG);
+  sendData("AT+CIPSTATUS\r\n",2000,DEBUG);
   
   
   String GetComm ="GET http://";
