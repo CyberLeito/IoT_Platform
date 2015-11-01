@@ -1,25 +1,27 @@
+//#include <SendOnlySoftwareSerial.h>
 #include <SoftwareSerial.h>
 #define DEBUG true 
 
 //#######################################################
 String WiFi_SSID = "\"jaheen_wifi\"";
 String WiFi_Pass = "\"veyofushi\"";
-String HOSTIP = "\"192.168.0.112\""; //IP of raspberry pi
+String HOSTIP = "192.168.0.112"; //IP of raspberry pi
 String HOSTPort = "90"; // webserver port on raspberry pi
-String DName = "TestProbe4";
+String DName = "ProMiniToy_3.0";
 String Dtype = "Switch"; 
 
-String dev1 ="TubeLight:12!";//device name followed by a colon, device/relay pin, followed by exclamation mark
-String dev2 ="RedLight:11!";
-String dev3 ="Fan:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
-String dev4 ="TestLED6:13!";
-String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
+String dev1 ="Purple:9!";//device name followed by a colon, device/relay pin, followed by exclamation mark
+String dev2 ="Red:7!";
+String dev5 ="White:6!";
+String dev3 ="Yellow:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
+String dev4 ="Green:12!";
+String DList =dev1 + dev2 + dev3 + dev4 + dev5; //add all the devices you have included
 //#######################################################
 
-SoftwareSerial esp8266(2,3); // make RX Arduino line is pin 2, make TX Arduino line is pin 3.
-                             // This means that you need to connect the TX line from the esp to the Arduino's pin 2
-                             // and the RX line from the esp to the Arduino's pin 3
-
+SoftwareSerial esp8266(3,2); //RX >> 2
+                             //TX >>3
+//SendOnlySoftwareSerial Serialx(4);
+                            
 String Data ="";
 String DlistX="CIFSR";
 
@@ -29,20 +31,16 @@ int len_total=11; // calculated length
 void setup()
 {
   Serial.begin(9600);
-  Serial.print("Initialising serial..");
   esp8266.begin(9600); // your esp's baud rate might be different
   
   for(int i=4;i<14;i++){
     pinMode(i,OUTPUT);
   }
-  digitalWrite(11,LOW);
-  digitalWrite(12,LOW);
-  digitalWrite(13,LOW);
      
   sendData("AT+RST\r\n",2000,DEBUG); // reset module
-  //sendData("AT+CWMODE=2\r\n",1000,DEBUG); // configure as access point
-  sendData("AT+CWMODE=1\r\n",1000,DEBUG);
+  //sendData("AT+CWMODE=1\r\n",1000,DEBUG);
   sendData("AT+CWJAP="+WiFi_SSID+","+WiFi_Pass+"\r\n",7000,DEBUG);
+  delay(2000);
   sendData("AT+CIFSR\r\n",1000,DEBUG); // get ip address
 //  ----------------------------------------------------------------------------------------------
   Some();
@@ -59,15 +57,15 @@ void setup()
 // -------------------------------------------------------------------------------------------- 
   sendData("AT+CIPMUX=1\r\n",1000,DEBUG); // configure for multiple connections
   //sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // turn on server on port 80
-  sendData("AT+CIPSTART=4,\"TCP\","+HOSTIP+","+HOSTPort+"\r\n",1000,DEBUG);
-  sendData("AT+CIPSTATUS\r\n",1000,DEBUG);
+  sendData("AT+CIPSTART=4,\"TCP\",\""+HOSTIP+"\","+HOSTPort+"\r\n",1000,DEBUG);
+  sendData("AT+CIPSTATUS\r\n",2000,DEBUG);
   
   
   String GetComm ="GET http://";
   GetComm+=HOSTIP;
   GetComm+=":";
   GetComm+=HOSTPort;
-  GetComm+="/connect.php?data=";
+  GetComm+="/connect2.php?data="; //use "connect2.php" for stock ESP8266 firmware, and "connect.php" for updated firmware
   GetComm+=Data;
   GetComm+="\r\n";
   //------------------

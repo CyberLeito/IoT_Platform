@@ -11,8 +11,8 @@ String Dtype = "Switch";
 
 String dev1 ="Light9:9!";//device name followed by a colon, device/relay pin, followed by exclamation mark
 String dev2 ="Light6:6!";
-String dev3 ="Light10:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
-String dev4 ="Someupdates:12!";
+String dev3 ="nsodsonds10:10!";     // add more devices with 'dev4' 'dev5'  'dev6'
+String dev4 ="Sdododod:12!";
 String DList =dev1 + dev2 + dev3 + dev4; //add all the devices you have included
 //#######################################################
 
